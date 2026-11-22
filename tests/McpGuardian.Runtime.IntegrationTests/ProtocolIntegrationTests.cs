@@ -10,7 +10,8 @@ public sealed class ProtocolIntegrationTests
         var repository = FindRepositoryRoot();
         var server = Path.Combine(repository, "samples", "SecureMcpServer", "bin", "Release", "net10.0", "SecureMcpServer.dll");
         Assert.True(File.Exists(server), $"Build the solution before integration tests. Missing: {server}");
-        var transport = new StdioClientTransport(new StdioClientTransportOptions { Name = "secure-sample", Command = "/usr/local/share/dotnet/dotnet", Arguments = [server], WorkingDirectory = repository, InheritEnvironmentVariables = false, EnvironmentVariables = StdioClientTransportOptions.GetDefaultEnvironmentVariables(), ShutdownTimeout = TimeSpan.FromSeconds(5) });
+        var dotnetHost = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "dotnet";
+        var transport = new StdioClientTransport(new StdioClientTransportOptions { Name = "secure-sample", Command = dotnetHost, Arguments = [server], WorkingDirectory = repository, InheritEnvironmentVariables = false, EnvironmentVariables = StdioClientTransportOptions.GetDefaultEnvironmentVariables(), ShutdownTimeout = TimeSpan.FromSeconds(5) });
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         await using var client = await McpClient.CreateAsync(transport, cancellationToken: timeout.Token);
         var allowed = await client.CallToolAsync("get_system_status", cancellationToken: timeout.Token);
