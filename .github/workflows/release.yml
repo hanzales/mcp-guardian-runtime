@@ -1,12 +1,18 @@
-name: Prepare NuGet Release
+name: Prepare or Publish NuGet Package
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: Package version to prepare
+        description: Semantic package version
         required: true
         default: 0.1.0-preview.1
+        type: string
+      publish:
+        description: Publish McpGuardian.Runtime to NuGet.org after verification
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -14,19 +20,38 @@ permissions:
 jobs:
   package:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
       - run: dotnet restore McpGuardian.Runtime.slnx --configfile NuGet.config
       - run: dotnet build McpGuardian.Runtime.slnx -c Release --no-restore -p:Version=${{ inputs.version }}
       - run: dotnet test McpGuardian.Runtime.slnx -c Release --no-build --no-restore
-      - run: dotnet pack src/McpGuardian.Runtime/McpGuardian.Runtime.csproj -c Release --no-build -p:Version=${{ inputs.version }} -o artifacts/packages
+      - name: Pack
+        env:
+          PACKAGE_VERSION: ${{ inputs.version }}
+        run: dotnet pack src/McpGuardian.Runtime/McpGuardian.Runtime.csproj -c Release --no-build -p:PackageVersion="$PACKAGE_VERSION" -o artifacts/packages
       - uses: actions/upload-artifact@v4
         with:
           name: McpGuardian.Runtime-${{ inputs.version }}
           path: artifacts/packages/*.*nupkg
-
-      # Publishing is intentionally absent. Download and inspect the artifact,
-      # then add trusted publishing only after explicit authorization.
+      - name: NuGet login
+        if: inputs.publish
+        uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ilhanemir
+      - name: Publish to NuGet.org
+        if: inputs.publish
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: >-
+          dotnet nuget push artifacts/packages/McpGuardian.Runtime.*.nupkg
+          --api-key "$NUGET_API_KEY"
+          --source https://api.nuget.org/v3/index.json
