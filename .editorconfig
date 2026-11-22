@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+dotnet_style_qualification_for_field = false:suggestion
+
+[tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none
+
+[samples/**/*.cs]
+dotnet_diagnostic.CA1050.severity = none
+
+[benchmarks/**/*.cs]
+dotnet_diagnostic.CA1050.severity = none

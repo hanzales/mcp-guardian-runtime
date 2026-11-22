@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/McpGuardian.Runtime.Benchmarks/McpGuardian.Runtime.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/SecureMcpServer/SecureMcpServer.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/McpGuardian.Runtime/McpGuardian.Runtime.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/McpGuardian.Runtime.IntegrationTests/McpGuardian.Runtime.IntegrationTests.csproj" />
+    <Project Path="tests/McpGuardian.Runtime.Tests/McpGuardian.Runtime.Tests.csproj" />
+  </Folder>
+</Solution>
